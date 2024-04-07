@@ -126,7 +126,7 @@ const filterSensitiveData = (
   aclGroup: any[],
   auth: any,
   operation: any,
-  schema: SchemaController.SchemaController | any,
+  schema: SchemaController.SchemaController,
   className: string,
   protectedFields: null | Array<any>,
   object: any
@@ -135,8 +135,7 @@ const filterSensitiveData = (
   if (auth && auth.user) userId = auth.user.id;
 
   // replace protectedFields when using pointer-permissions
-  const perms =
-    schema && schema.getClassLevelPermissions ? schema.getClassLevelPermissions(className) : {};
+  const perms = schema.getClassLevelPermissions(className);
   if (perms) {
     const isReadOperation = ['get', 'find'].indexOf(operation) > -1;
 
@@ -1533,17 +1532,14 @@ class DatabaseController {
   }
 
   addProtectedFields(
-    schema: SchemaController.SchemaController | any,
+    schema: SchemaController.SchemaController,
     className: string,
     query: any = {},
     aclGroup: any[] = [],
     auth: any = {},
     queryOptions: FullQueryOptions = {}
   ): null | string[] {
-    const perms =
-      schema && schema.getClassLevelPermissions
-        ? schema.getClassLevelPermissions(className)
-        : schema;
+    const perms = schema.getClassLevelPermissions(className);
     if (!perms) return null;
 
     const protectedFields = perms.protectedFields;
@@ -1809,10 +1805,8 @@ class DatabaseController {
   }
 
   static _validateQuery: any => void;
-  static filterSensitiveData: (boolean, any[], any, any, any, string, any[], any) => void;
 }
 
 module.exports = DatabaseController;
 // Expose validateQuery for tests
 module.exports._validateQuery = validateQuery;
-module.exports.filterSensitiveData = filterSensitiveData;
