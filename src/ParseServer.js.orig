@@ -148,7 +148,7 @@ class ParseServer {
       })
     );
 
-    api.use('/health', function(req, res) {
+    api.use('/health', function (req, res) {
       res.json({
         status: 'ok',
       });
@@ -180,7 +180,7 @@ class ParseServer {
       });
       // verify the server url after a 'mount' event is received
       /* istanbul ignore next */
-      api.on('mount', function() {
+      api.on('mount', function () {
         ParseServer.verifyServerUrl();
       });
     }
@@ -278,9 +278,6 @@ class ParseServer {
         options.liveQueryServerOptions,
         options
       );
-    }
-    if (options.trustProxy) {
-      app.set('trust proxy', options.trustProxy);
     }
     /* istanbul ignore next */
     if (!process.env.TESTING) {
@@ -439,7 +436,7 @@ function configureListeners(parseServer) {
     });
   });
 
-  const destroyAliveConnections = function() {
+  const destroyAliveConnections = function () {
     for (const socketId in sockets) {
       try {
         sockets[socketId].destroy();
@@ -449,7 +446,7 @@ function configureListeners(parseServer) {
     }
   };
 
-  const handleShutdown = function() {
+  const handleShutdown = function () {
     process.stdout.write('Termination signal received. Shutting down.');
     destroyAliveConnections();
     server.close();
