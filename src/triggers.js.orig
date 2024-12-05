@@ -24,15 +24,15 @@ export const Types = {
 const FileClassName = '@File';
 const ConnectClassName = '@Connect';
 
-const baseStore = function() {
-  const Validators = Object.keys(Types).reduce(function(base, key) {
+const baseStore = function () {
+  const Validators = Object.keys(Types).reduce(function (base, key) {
     base[key] = {};
     return base;
   }, {});
   const Functions = {};
   const Jobs = {};
   const LiveQuery = [];
-  const Triggers = Object.keys(Types).reduce(function(base, key) {
+  const Triggers = Object.keys(Types).reduce(function (base, key) {
     base[key] = {};
     return base;
   }, {});
@@ -81,12 +81,6 @@ const Category = {
 };
 
 function getStore(category, name, applicationId) {
-  const invalidNameRegex = /['"`]/;
-  if (invalidNameRegex.test(name)) {
-    // Prevent a malicious user from injecting properties into the store
-    return {};
-  }
-
   const path = name.split('.');
   path.splice(-1); // remove last component
   applicationId = applicationId || Parse.applicationId;
@@ -95,7 +89,7 @@ function getStore(category, name, applicationId) {
   for (const component of path) {
     store = store[component];
     if (!store) {
-      return {};
+      return undefined;
     }
   }
   return store;
@@ -305,7 +299,7 @@ export function getRequestQueryObject(triggerType, auth, query, count, config, c
 // Any changes made to the object in a beforeSave will be included.
 export function getResponseObject(request, resolve, reject) {
   return {
-    success: function(response) {
+    success: function (response) {
       if (request.triggerName === Types.afterFind) {
         if (!response) {
           response = request.objects;
@@ -336,7 +330,7 @@ export function getResponseObject(request, resolve, reject) {
       }
       return resolve(response);
     },
-    error: function(error) {
+    error: function (error) {
       const e = resolveError(error, {
         code: Parse.Error.SCRIPT_FAILED,
         message: 'Script failed. Unknown error.',
@@ -667,8 +661,9 @@ function builtInTriggerValidator(options, request) {
     }
 
     if (!opts.includes(val)) {
-      throw opt.error ||
-        `Validation failed. Invalid option for ${key}. Expected: ${opts.join(', ')}`;
+      throw (
+        opt.error || `Validation failed. Invalid option for ${key}. Expected: ${opts.join(', ')}`
+      );
     }
   };
 
@@ -756,7 +751,7 @@ export function maybeRunTrigger(
   if (!parseObject) {
     return Promise.resolve({});
   }
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var trigger = getTrigger(parseObject.className, triggerType, config.applicationId);
     if (!trigger) return resolve();
     var request = getRequestObject(
