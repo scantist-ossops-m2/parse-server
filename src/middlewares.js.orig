@@ -10,7 +10,7 @@ import MongoStorageAdapter from './Adapters/Storage/Mongo/MongoStorageAdapter';
 export const DEFAULT_ALLOWED_HEADERS =
   'X-Parse-Master-Key, X-Parse-REST-API-Key, X-Parse-Javascript-Key, X-Parse-Application-Id, X-Parse-Client-Version, X-Parse-Session-Token, X-Requested-With, X-Parse-Revocable-Session, X-Parse-Request-Id, Content-Type, Pragma, Cache-Control';
 
-const getMountForRequest = function(req) {
+const getMountForRequest = function (req) {
   const mountPathLength = req.originalUrl.length - req.url.length;
   const mountPath = req.originalUrl.slice(0, mountPathLength);
   return req.protocol + '://' + req.get('host') + mountPath;
@@ -181,10 +181,10 @@ export function handleParseHeaders(req, res, next) {
   // Client keys are not required in parse-server, but if any have been configured in the server, validate them
   //  to preserve original behavior.
   const keys = ['clientKey', 'javascriptKey', 'dotNetKey', 'restAPIKey'];
-  const oneKeyConfigured = keys.some(function(key) {
+  const oneKeyConfigured = keys.some(function (key) {
     return req.config[key] !== undefined;
   });
-  const oneKeyMatches = keys.some(function(key) {
+  const oneKeyMatches = keys.some(function (key) {
     return req.config[key] !== undefined && info[key] === req.config[key];
   });
 
@@ -257,7 +257,22 @@ export function handleParseHeaders(req, res, next) {
 }
 
 function getClientIp(req) {
-  return req.ip;
+  if (req.headers['x-forwarded-for']) {
+    // try to get from x-forwared-for if it set (behind reverse proxy)
+    return req.headers['x-forwarded-for'].split(',')[0];
+  } else if (req.connection && req.connection.remoteAddress) {
+    // no proxy, try getting from connection.remoteAddress
+    return req.connection.remoteAddress;
+  } else if (req.socket) {
+    // try to get it from req.socket
+    return req.socket.remoteAddress;
+  } else if (req.connection && req.connection.socket) {
+    // try to get it form the connection.socket
+    return req.connection.socket.remoteAddress;
+  } else {
+    // if non above, fallback.
+    return req.ip;
+  }
 }
 
 function httpAuth(req) {
