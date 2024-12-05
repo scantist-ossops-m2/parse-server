@@ -77,12 +77,6 @@ const Category = {
 };
 
 function getStore(category, name, applicationId) {
-  const invalidNameRegex = /['"`]/;
-  if (invalidNameRegex.test(name)) {
-    // Prevent a malicious user from injecting properties into the store
-    return {};
-  }
-
   const path = name.split('.');
   path.splice(-1); // remove last component
   applicationId = applicationId || Parse.applicationId;
@@ -91,7 +85,7 @@ function getStore(category, name, applicationId) {
   for (const component of path) {
     store = store[component];
     if (!store) {
-      return {};
+      return undefined;
     }
   }
   return store;
@@ -718,12 +712,7 @@ export function getRequestFileObject(triggerType, auth, fileObject, config) {
   return request;
 }
 
-export async function maybeRunFileTrigger(
-  triggerType,
-  fileObject,
-  config,
-  auth
-) {
+export async function maybeRunFileTrigger(triggerType, fileObject, config, auth) {
   const fileTrigger = getFileTrigger(triggerType, config.applicationId);
   if (typeof fileTrigger === 'function') {
     try {
@@ -739,8 +728,8 @@ export async function maybeRunFileTrigger(
         'Parse.File',
         { ...fileObject.file.toJSON(), fileSize: fileObject.fileSize },
         result,
-        auth
-      );
+        auth,
+      )
       return result || fileObject;
     } catch (error) {
       logTriggerErrorBeforeHook(
@@ -748,7 +737,7 @@ export async function maybeRunFileTrigger(
         'Parse.File',
         { ...fileObject.file.toJSON(), fileSize: fileObject.fileSize },
         auth,
-        error
+        error,
       );
       throw error;
     }
