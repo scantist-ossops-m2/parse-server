@@ -23,12 +23,12 @@ export const Types = {
 const FileClassName = '@File';
 const ConnectClassName = '@Connect';
 
-const baseStore = function() {
+const baseStore = function () {
   const Validators = {};
   const Functions = {};
   const Jobs = {};
   const LiveQuery = [];
-  const Triggers = Object.keys(Types).reduce(function(base, key) {
+  const Triggers = Object.keys(Types).reduce(function (base, key) {
     base[key] = {};
     return base;
   }, {});
@@ -80,12 +80,6 @@ const Category = {
 };
 
 function getStore(category, name, applicationId) {
-  const invalidNameRegex = /['"`]/;
-  if (invalidNameRegex.test(name)) {
-    // Prevent a malicious user from injecting properties into the store
-    return {};
-  }
-
   const path = name.split('.');
   path.splice(-1); // remove last component
   applicationId = applicationId || Parse.applicationId;
@@ -94,7 +88,7 @@ function getStore(category, name, applicationId) {
   for (const component of path) {
     store = store[component];
     if (!store) {
-      return {};
+      return undefined;
     }
   }
   return store;
@@ -315,7 +309,7 @@ export function getRequestQueryObject(
 // Any changes made to the object in a beforeSave will be included.
 export function getResponseObject(request, resolve, reject) {
   return {
-    success: function(response) {
+    success: function (response) {
       if (request.triggerName === Types.afterFind) {
         if (!response) {
           response = request.objects;
@@ -350,7 +344,7 @@ export function getResponseObject(request, resolve, reject) {
       }
       return resolve(response);
     },
-    error: function(error) {
+    error: function (error) {
       if (error instanceof Parse.Error) {
         reject(error);
       } else if (error instanceof Error) {
@@ -600,7 +594,7 @@ export function maybeRunTrigger(
   if (!parseObject) {
     return Promise.resolve({});
   }
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     var trigger = getTrigger(
       parseObject.className,
       triggerType,
